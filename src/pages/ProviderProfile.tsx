@@ -46,9 +46,10 @@ function ProviderProfileContent({ id }: ProviderProfileContentProps) {
           description={provider.description}
           interventionZones={detail.interventionZones}
           services={provider.services}
+          isVerified={provider.isVerified}
         />
       )}
-      {activeTab === 'works' && <WorksTab works={detail.works} />}
+      {activeTab === 'works' && <WorksTab works={detail.works} isVerified={provider.isVerified} />}
       {activeTab === 'reviews' && (
         <ReviewsTab
           rating={provider.rating}
