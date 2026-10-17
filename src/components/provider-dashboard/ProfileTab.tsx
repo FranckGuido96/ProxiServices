@@ -1,150 +1,178 @@
-import React, { useState, useEffect } from 'react';
+import React, { useId, useState } from 'react';
 import { User, Check } from 'lucide-react';
+import { ProviderProfileData } from '../../types/dashboard';
 
 interface ProfileTabProps {
-    onServicesChange?: (services: string[]) => void;
-    onAddressChange?: (address: { ville: string; commune: string; quartier: string }) => void;
+  profile: ProviderProfileData;
+  onChange: (profile: ProviderProfileData) => void;
 }
 
-export const ProfileTab: React.FC<ProfileTabProps> = ({ onServicesChange, onAddressChange }) => {
-    const [bio, setBio] = useState('Intervention rapide pour toutes vos urgences en plomberie à Cocody et environs. 10 ans d\'expérience et matériel professionnel.');
-    const [name, setName] = useState('Koffi Yao');
-    const [trade, setTrade] = useState('Plombier');
-    const [ville, setVille] = useState('Abidjan');
-    const [commune, setCommune] = useState('Cocody');
-    const [quartier, setQuartier] = useState('Angré');
-    const [phone, setPhone] = useState('07 08 09 10 11');
-    const [services, setServices] = useState<string[]>([
-        'Dépannage fuite d\'eau', 'Installation sanitaire', 'Débouchage rapide', 'Rénovation salle de bain',
-    ]);
-    const [newServiceInput, setNewServiceInput] = useState('');
-    const [saveSuccess, setSaveSuccess] = useState(false);
+const labelClass = 'block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest';
+const fieldClass =
+  'w-full text-xs border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30';
 
-    useEffect(() => {
-        onServicesChange?.(services);
-    }, [services, onServicesChange]);
+interface TextFieldProps {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  type?: 'text' | 'tel';
+}
 
-    useEffect(() => {
-        onAddressChange?.({ ville, commune, quartier });
-    }, [ville, commune, quartier, onAddressChange]);
+const TextField: React.FC<TextFieldProps> = ({ id, label, value, onChange, placeholder, type = 'text' }) => (
+  <div>
+    <label htmlFor={id} className={`${labelClass} mb-1`}>
+      {label}
+    </label>
+    <input
+      id={id}
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className={`${fieldClass} p-2.5`}
+    />
+  </div>
+);
 
-    const handleSaveProfile = (e: React.FormEvent) => {
-        e.preventDefault();
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
-    };
+export const ProfileTab: React.FC<ProfileTabProps> = ({ profile, onChange }) => {
+  const uid = useId();
+  const [newServiceInput, setNewServiceInput] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
-    const handleAddService = () => {
-        if (newServiceInput.trim() && !services.includes(newServiceInput.trim())) {
-            setServices([...services, newServiceInput.trim()]);
-            setNewServiceInput('');
-        }
-    };
+  const update = (patch: Partial<ProviderProfileData>) => onChange({ ...profile, ...patch });
 
-    const handleRemoveService = (s: string) => setServices(services.filter((srv) => srv !== s));
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO Supabase : enregistrer le profil, n'afficher le succès qu'après la réponse
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
+  };
 
-    return (
-        <div className="px-4">
-            <form onSubmit={handleSaveProfile} className="bg-surface dark:bg-[#121215] rounded-2xl p-4 border border-border dark:border-white/10 shadow-sm dark:shadow-xl space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-border dark:border-white/5">
-                    <h3 className="text-xs font-bold text-text dark:text-white uppercase tracking-wider flex items-center gap-2">
-                        <User className="w-4 h-4 text-primary-700 dark:text-emerald-400" />
-                        <span>Modifier mes informations</span>
-                    </h3>
-                    {saveSuccess && (
-                        <span className="text-[11px] text-primary-700 dark:text-emerald-400 font-bold flex items-center gap-1">
-                            <Check className="w-3.5 h-3.5" /> Enregistré !
-                        </span>
-                    )}
-                </div>
+  const handleAddService = () => {
+    const service = newServiceInput.trim();
+    if (!service || profile.services.includes(service)) return;
+    update({ services: [...profile.services, service] });
+    setNewServiceInput('');
+  };
 
-                <div>
-                    <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest mb-1.5">
-                        Présentation / Bio *
-                    </label>
-                    <textarea
-                        value={bio}
-                        onChange={(e) => setBio(e.target.value)}
-                        rows={3}
-                        maxLength={300}
-                        className="w-full text-xs p-3 border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30"
-                    />
-                    <p className={`text-[10px] text-right mt-1 font-medium ${bio.length > 280 ? 'text-amber-500 dark:text-amber-400' : 'text-text-secondary dark:text-white/40'}`}>
-                        {bio.length}/300
-                    </p>
-                </div>
+  const handleRemoveService = (service: string) =>
+    update({ services: profile.services.filter((s) => s !== service) });
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div>
-                        <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest mb-1">Nom & Prénom</label>
-                        <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-                            className="w-full text-xs p-2.5 border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30" />
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest mb-1">Métier principal</label>
-                        <input type="text" value={trade} onChange={(e) => setTrade(e.target.value)}
-                            className="w-full text-xs p-2.5 border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30" />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest mb-1">Téléphone</label>
-                    <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)}
-                        className="w-full text-xs p-2.5 border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30" />
-                </div>
-
-                <div className="space-y-3 pt-1">
-                    <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest">Adresse</label>
-                    <div>
-                        <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest mb-1">Ville</label>
-                        <input type="text" value={ville} onChange={(e) => setVille(e.target.value)} placeholder="Ex: Abidjan"
-                            className="w-full text-xs p-2.5 border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30" />
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest mb-1">Commune</label>
-                        <input type="text" value={commune} onChange={(e) => setCommune(e.target.value)} placeholder="Ex: Cocody"
-                            className="w-full text-xs p-2.5 border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30" />
-                    </div>
-                    <div>
-                        <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest mb-1">Quartier</label>
-                        <input type="text" value={quartier} onChange={(e) => setQuartier(e.target.value)} placeholder="Ex: Angré"
-                            className="w-full text-xs p-2.5 border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30" />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-[10px] font-bold text-text-secondary dark:text-white/50 uppercase tracking-widest mb-1.5">Services proposés</label>
-                    <div className="flex flex-wrap gap-1.5 mb-2">
-                        {services.map((srv) => (
-                            <span key={srv} className="inline-flex items-center gap-1 bg-primary-50 dark:bg-emerald-950/80 border border-primary-200 dark:border-emerald-500/30 text-primary-700 dark:text-emerald-300 text-xs px-2.5 py-1 rounded-lg">
-                                <span>{srv}</span>
-                                <button type="button" onClick={() => handleRemoveService(srv)} className="text-primary-500 dark:text-emerald-400 hover:text-text dark:hover:text-white">×</button>
-                            </span>
-                        ))}
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <input type="text" value={newServiceInput} onChange={(e) => setNewServiceInput(e.target.value)}
-                            placeholder="Ex: Remplacement chauffe-eau"
-                            className="flex-1 text-xs p-2 border border-border dark:border-white/10 rounded-xl bg-background dark:bg-[#09090B] text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary-500/30 dark:focus:ring-emerald-500/30" />
-                        <button type="button" onClick={handleAddService}
-                            className="py-2 px-3 bg-text/10 dark:bg-white/10 hover:bg-text/15 dark:hover:bg-white/15 text-text dark:text-white text-xs font-bold rounded-xl transition">
-                            + Ajouter
-                        </button>
-                    </div>
-                </div>
-
-                <div>
-                    <button type="submit"
-                        className="w-full py-3 bg-primary-700 hover:bg-primary-800 dark:bg-[#137547] dark:hover:bg-[#10633c] text-white font-bold text-xs tracking-wider uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 mt-2">
-                        <Check className="w-4 h-4" /><span>Sauvegarder les modifications</span>
-                    </button>
-                    {saveSuccess && (
-                        <p className="text-center text-xs text-primary-700 dark:text-emerald-400 font-bold mt-2 flex items-center justify-center gap-1">
-                            <Check className="w-3.5 h-3.5" /> Modifications enregistrées !
-                        </p>
-                    )}
-                </div>
-            </form>
+  return (
+    <div className="px-4">
+      <form
+        onSubmit={handleSaveProfile}
+        className="bg-surface dark:bg-[#121215] rounded-2xl p-4 border border-border dark:border-white/10 shadow-sm dark:shadow-xl space-y-4"
+      >
+        <div className="flex items-center justify-between pb-2 border-b border-border dark:border-white/5">
+          <h3 className="text-xs font-bold text-text dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <User className="w-4 h-4 text-primary-700 dark:text-emerald-400" />
+            <span>Modifier mes informations</span>
+          </h3>
         </div>
-    );
+
+        <div>
+          <label htmlFor={`${uid}-bio`} className={`${labelClass} mb-1.5`}>
+            Présentation / Bio *
+          </label>
+          <textarea
+            id={`${uid}-bio`}
+            value={profile.bio}
+            onChange={(e) => update({ bio: e.target.value })}
+            rows={3}
+            maxLength={300}
+            className={`${fieldClass} p-3`}
+          />
+          <p
+            className={`text-[10px] text-right mt-1 font-medium ${
+              profile.bio.length > 280 ? 'text-amber-500 dark:text-amber-400' : 'text-text-secondary dark:text-white/40'
+            }`}
+          >
+            {profile.bio.length}/300
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <TextField id={`${uid}-name`} label="Nom & Prénom" value={profile.name} onChange={(name) => update({ name })} />
+          <TextField id={`${uid}-trade`} label="Métier principal" value={profile.trade} onChange={(trade) => update({ trade })} />
+        </div>
+
+        <TextField id={`${uid}-phone`} type="tel" label="Téléphone" value={profile.phone} onChange={(phone) => update({ phone })} />
+
+        <fieldset className="space-y-3 pt-1">
+          <legend className={`${labelClass} mb-2`}>Adresse</legend>
+          <TextField id={`${uid}-ville`} label="Ville" value={profile.ville} onChange={(ville) => update({ ville })} placeholder="Ex: Abidjan" />
+          <TextField id={`${uid}-commune`} label="Commune" value={profile.commune} onChange={(commune) => update({ commune })} placeholder="Ex: Cocody" />
+          <TextField id={`${uid}-quartier`} label="Quartier" value={profile.quartier} onChange={(quartier) => update({ quartier })} placeholder="Ex: Angré" />
+        </fieldset>
+
+        <div>
+          <label htmlFor={`${uid}-service`} className={`${labelClass} mb-1.5`}>
+            Services proposés
+          </label>
+          <ul className="flex flex-wrap gap-1.5 mb-2">
+            {profile.services.map((service) => (
+              <li
+                key={service}
+                className="inline-flex items-center gap-1 bg-primary-50 dark:bg-emerald-950/80 border border-primary-200 dark:border-emerald-500/30 text-primary-700 dark:text-emerald-300 text-xs px-2.5 py-1 rounded-lg"
+              >
+                <span>{service}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveService(service)}
+                  aria-label={`Retirer ${service}`}
+                  className="text-primary-500 dark:text-emerald-400 hover:text-text dark:hover:text-white"
+                >
+                  ×
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center gap-2">
+            <input
+              id={`${uid}-service`}
+              type="text"
+              value={newServiceInput}
+              onChange={(e) => setNewServiceInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAddService();
+                }
+              }}
+              placeholder="Ex: Remplacement chauffe-eau"
+              className={`flex-1 ${fieldClass} p-2`}
+            />
+            <button
+              type="button"
+              onClick={handleAddService}
+              className="py-2 px-3 bg-text/10 dark:bg-white/10 hover:bg-text/15 dark:hover:bg-white/15 text-text dark:text-white text-xs font-bold rounded-xl transition"
+            >
+              + Ajouter
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <button
+            type="submit"
+            className="w-full py-3 bg-primary-700 hover:bg-primary-800 dark:bg-[#137547] dark:hover:bg-[#10633c] text-white font-bold text-xs tracking-wider uppercase rounded-xl transition shadow-lg flex items-center justify-center gap-2 mt-2"
+          >
+            <Check className="w-4 h-4" />
+            <span>Sauvegarder les modifications</span>
+          </button>
+          {saveSuccess && (
+            <p
+              role="status"
+              className="text-center text-xs text-primary-700 dark:text-emerald-400 font-bold mt-2 flex items-center justify-center gap-1"
+            >
+              <Check className="w-3.5 h-3.5" /> Modifications enregistrées !
+            </p>
+          )}
+        </div>
+      </form>
+    </div>
+  );
 };
