@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Share2, Heart, CheckCircle2, Star, MapPin, Phone, MessageCircle } from 'lucide-react';
 import { Provider } from '../../types';
@@ -9,8 +9,47 @@ interface ProfileHeaderProps {
   onToggleFavorite: () => void;
 }
 
+type ShareStatus = 'copied' | 'error' | null;
+
 export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ provider, isFavorite, onToggleFavorite }) => {
   const navigate = useNavigate();
+  const [shareStatus, setShareStatus] = useState<ShareStatus>(null);
+  const statusTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
+    };
+  }, []);
+
+  const showStatus = (status: Exclude<ShareStatus, null>) => {
+    setShareStatus(status);
+    if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
+    statusTimeoutRef.current = setTimeout(() => setShareStatus(null), 2500);
+  };
+
+  // Feuille de partage native quand elle existe (téléphone), sinon copie du lien
+  const handleShare = async () => {
+    const url = window.location.href;
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({
+          title: `${provider.name} — ${provider.trade}`,
+          text: `Découvrez le profil de ${provider.name} (${provider.trade}) sur ProxiServices`,
+          url,
+        });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      showStatus('copied');
+    } catch (error) {
+      // Fermer la feuille de partage sans partager n'est pas une erreur
+      if (error instanceof DOMException && error.name === 'AbortError') return;
+      showStatus('error');
+    }
+  };
+
+  const shareMessage = shareStatus === 'copied' ? 'Lien copié' : shareStatus === 'error' ? 'Copie impossible' : '';
 
   return (
     <div className="bg-gradient-to-b from-primary-500 to-primary-700 dark:from-[#0B1E16] dark:via-[#0F281E] dark:to-[#0A1A14] px-4 pt-5 pb-6 rounded-b-3xl">
@@ -24,10 +63,17 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ provider, isFavori
           <ArrowLeft className="w-4 h-4" />
         </button>
         <div className="flex items-center gap-2">
+          <span
+            role="status"
+            className={shareStatus ? 'text-[11px] font-semibold text-white/90 mr-1' : 'sr-only'}
+          >
+            {shareMessage}
+          </span>
           <button
             type="button"
+            onClick={handleShare}
             className="p-2 rounded-xl bg-white/15 dark:bg-white/5 border border-white/25 dark:border-white/10 text-white"
-            aria-label="Partager"
+            aria-label="Partager ce profil"
           >
             <Share2 className="w-4 h-4" />
           </button>

@@ -30,6 +30,17 @@ function ProviderProfileContent({ id }: ProviderProfileContentProps) {
     setPendingReviews((prev) => [{ id: Date.now().toString(), ...review }, ...prev]);
   };
 
+  // Attributs communs des panneaux : reliés à leur onglet par les identifiants de ProfileTabs
+  const panelProps = (tab: ProfileTab) => ({
+    role: 'tabpanel',
+    id: `profile-tabpanel-${tab}`,
+    'aria-labelledby': `profile-tab-${tab}`,
+    hidden: activeTab !== tab,
+    tabIndex: 0,
+    className:
+      'outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400 rounded-2xl',
+  });
+
   return (
     <div className="min-h-screen bg-background dark:bg-[#050505] pb-24">
       <ProfileHeader provider={provider} isFavorite={isFavorite} onToggleFavorite={() => setIsFavorite((v) => !v)} />
@@ -41,24 +52,30 @@ function ProviderProfileContent({ id }: ProviderProfileContentProps) {
         reviewsCount={detail.reviews.length}
       />
 
-      {activeTab === 'presentation' && (
-        <PresentationTab
-          description={provider.description}
-          interventionZones={detail.interventionZones}
-          services={provider.services}
-          isVerified={provider.isVerified}
-        />
-      )}
-      {activeTab === 'works' && <WorksTab works={detail.works} isVerified={provider.isVerified} />}
-      {activeTab === 'reviews' && (
-        <ReviewsTab
-          rating={provider.rating}
-          reviews={detail.reviews}
-          providerName={provider.name}
-          pendingReviews={pendingReviews}
-          onWriteReview={() => setIsReviewModalOpen(true)}
-        />
-      )}
+      <div {...panelProps('presentation')}>
+        {activeTab === 'presentation' && (
+          <PresentationTab
+            description={provider.description}
+            interventionZones={detail.interventionZones}
+            services={provider.services}
+            isVerified={provider.isVerified}
+          />
+        )}
+      </div>
+      <div {...panelProps('works')}>
+        {activeTab === 'works' && <WorksTab works={detail.works} isVerified={provider.isVerified} />}
+      </div>
+      <div {...panelProps('reviews')}>
+        {activeTab === 'reviews' && (
+          <ReviewsTab
+            rating={provider.rating}
+            reviews={detail.reviews}
+            providerName={provider.name}
+            pendingReviews={pendingReviews}
+            onWriteReview={() => setIsReviewModalOpen(true)}
+          />
+        )}
+      </div>
 
       <WriteReviewModal
         isOpen={isReviewModalOpen}
