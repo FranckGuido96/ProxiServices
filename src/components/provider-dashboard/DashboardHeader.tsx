@@ -1,7 +1,8 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ShieldCheck, CheckCircle2, MapPin, Edit3, Camera, Bell, ExternalLink } from 'lucide-react';
 import { NotificationsPanel } from './NotificationsPanel';
+import { DashboardNotification } from '../../data/dashboardDemo';
 
 interface DashboardHeaderProps {
   name: string;
@@ -10,9 +11,9 @@ interface DashboardHeaderProps {
   providerId: string;
   isVerified?: boolean;
   services?: string[];
+  notifications: DashboardNotification[];
   onBack: () => void;
   onEditProfile: () => void;
-  hasUnreadNotifications?: boolean;
 }
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
@@ -22,22 +23,34 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   providerId,
   isVerified = false,
   services = [],
+  notifications,
   onBack,
   onEditProfile,
-  hasUnreadNotifications = true,
 }) => {
   const [avatarSrc, setAvatarSrc] = useState(
     'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&auto=format&fit=crop&q=80'
   );
   const [notifOpen, setNotifOpen] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  // URL temporaire de la photo choisie : à libérer quand elle est remplacée ou quand on quitte la page
+  const avatarBlobUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (avatarBlobUrlRef.current) URL.revokeObjectURL(avatarBlobUrlRef.current);
+    };
+  }, []);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setAvatarSrc(URL.createObjectURL(file));
+    if (avatarBlobUrlRef.current) URL.revokeObjectURL(avatarBlobUrlRef.current);
+    const url = URL.createObjectURL(file);
+    avatarBlobUrlRef.current = url;
+    setAvatarSrc(url);
   };
 
+  const hasUnread = notifications.some((n) => n.isNew);
   const visibleServices = services.slice(0, 3);
   const extraCount = services.length - visibleServices.length;
 
@@ -68,16 +81,17 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               type="button"
               onClick={() => setNotifOpen((v) => !v)}
               className="relative p-2 rounded-xl bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 text-white/90 hover:text-white hover:bg-white/20 dark:hover:bg-white/10 transition"
-              aria-label="Notifications"
+              aria-label={hasUnread ? 'Notifications, nouvelles notifications' : 'Notifications'}
+              aria-haspopup="dialog"
               aria-expanded={notifOpen}
             >
               <Bell className="w-4 h-4" />
-              {hasUnreadNotifications && (
+              {hasUnread && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500 border border-white/60 dark:border-[#0A1A14]" />
               )}
             </button>
 
-            <NotificationsPanel isOpen={notifOpen} onClose={() => setNotifOpen(false)} />
+            <NotificationsPanel isOpen={notifOpen} onClose={() => setNotifOpen(false)} notifications={notifications} />
           </div>
         </div>
       </div>

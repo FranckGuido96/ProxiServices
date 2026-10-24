@@ -17,11 +17,11 @@ export const ArtisansSection: React.FC<ArtisansSectionProps> = ({ providers, fav
           Récemment <span className="not-italic font-sans font-bold">inscrits</span>
         </h2>
         <Link
-          to="/recherche"
-          className="text-xs font-semibold text-primary-700 dark:text-emerald-400 flex items-center gap-1 uppercase tracking-wider"
+          to="/nouveaux-prestataires"
+          className="text-xs font-semibold text-primary-700 dark:text-emerald-400 flex items-center gap-1 uppercase tracking-wider rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
         >
           <span>Tout voir</span>
-          <ArrowRight className="w-3.5 h-3.5" />
+          <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
         </Link>
       </div>
 
@@ -36,7 +36,7 @@ export const ArtisansSection: React.FC<ArtisansSectionProps> = ({ providers, fav
               {/* Zone principale : lien vers le profil */}
               <Link
                 to={`/prestataire/${p.id}`}
-                className="flex flex-col p-3 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
+                className="flex flex-col p-3 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
               >
                 <div className="w-12 h-12 rounded-full bg-background dark:bg-white/5 overflow-hidden border border-border dark:border-white/15 shrink-0">
                   <img src={p.avatarUrl} alt={p.name} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -69,7 +69,7 @@ export const ArtisansSection: React.FC<ArtisansSectionProps> = ({ providers, fav
               <button
                 type="button"
                 onClick={(e) => onToggleFavorite(p.id, e)}
-                className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-background dark:hover:bg-white/10 transition active:scale-90"
+                className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-background dark:hover:bg-white/10 transition active:scale-90 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
                 aria-label={isFavorite ? `Retirer ${p.name} des favoris` : `Ajouter ${p.name} aux favoris`}
               >
                 <Heart

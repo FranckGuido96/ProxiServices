@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Heart, User } from 'lucide-react';
 import Home from './pages/Home';
 import SearchResults from './pages/SearchResults';
+import AllCategories from './pages/AllCategories';
+import NewProviders from './pages/NewProviders';
 import ProviderProfile from './pages/ProviderProfile';
 import BecomeProviderStep1 from './pages/BecomeProviderStep1';
 import BecomeProviderStep2 from './pages/BecomeProviderStep2';
@@ -15,6 +17,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/recherche" element={<SearchResults />} />
+        <Route path="/categories" element={<AllCategories />} />
+        <Route path="/nouveaux-prestataires" element={<NewProviders />} />
         {/* Route statique déclarée avant la route dynamique /prestataire/:id */}
         <Route path="/prestataire/dashboard" element={<ProviderDashboard />} />
         <Route path="/prestataire/:id" element={<ProviderProfile />} />

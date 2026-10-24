@@ -12,6 +12,8 @@ export interface Provider {
   categoryId: string;
   isNew: boolean;
   isVerified: boolean;
+  // Date d'inscription au format AAAA-MM-JJ : sert à trier les « récemment inscrits »
+  registeredAt: string;
   location: string;
   commune: string;
   rating: number;

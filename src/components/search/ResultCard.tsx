@@ -7,15 +7,17 @@ interface ResultCardProps {
   provider: Provider;
   isFavorite: boolean;
   onToggleFavorite: (id: string, e: React.MouseEvent) => void;
+  // Affiche le badge « Nouveau » à côté du nom (utilisé par la page des nouveaux prestataires)
+  showNewBadge?: boolean;
 }
 
-export const ResultCard: React.FC<ResultCardProps> = ({ provider, isFavorite, onToggleFavorite }) => {
+export const ResultCard: React.FC<ResultCardProps> = ({ provider, isFavorite, onToggleFavorite, showNewBadge = false }) => {
   return (
     <div className="relative rounded-2xl bg-surface dark:bg-[#121215] border border-border dark:border-white/10 shadow-sm dark:shadow-lg hover:border-primary-300 dark:hover:border-white/25 transition">
       {/* Zone principale : lien vers le profil (pr-12 laisse la place au cœur) */}
       <Link
         to={`/prestataire/${provider.id}`}
-        className="flex items-center gap-3 p-3.5 pr-12 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
+        className="flex items-center gap-3 p-3.5 pr-12 rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
       >
         <img
           src={provider.avatarUrl}
@@ -24,7 +26,14 @@ export const ResultCard: React.FC<ResultCardProps> = ({ provider, isFavorite, on
           referrerPolicy="no-referrer"
         />
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-bold text-text dark:text-white truncate">{provider.name}</h3>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-sm font-bold text-text dark:text-white truncate">{provider.name}</h3>
+            {showNewBadge && provider.isNew && (
+              <span className="shrink-0 bg-primary-50 text-primary-700 border border-primary-200 dark:bg-emerald-950/90 dark:text-emerald-300 dark:border-emerald-500/30 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                Nouveau
+              </span>
+            )}
+          </div>
           <p className="text-xs font-semibold text-primary-700 dark:text-emerald-400">{provider.trade}</p>
           <div className="flex items-center gap-1.5 text-[11px] text-text-secondary dark:text-white/50 mt-0.5">
             <MapPin className="w-3 h-3 shrink-0" />
@@ -44,7 +53,7 @@ export const ResultCard: React.FC<ResultCardProps> = ({ provider, isFavorite, on
       <button
         type="button"
         onClick={(e) => onToggleFavorite(provider.id, e)}
-        className="absolute top-1/2 right-3 -translate-y-1/2 p-1.5"
+        className="absolute top-1/2 right-3 -translate-y-1/2 p-1.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
         aria-label={isFavorite ? `Retirer ${provider.name} des favoris` : `Ajouter ${provider.name} aux favoris`}
       >
         <Heart

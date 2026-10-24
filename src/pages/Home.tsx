@@ -9,12 +9,16 @@ import { BottomNav } from '../components/navigation/BottomNav';
 import { SideMenuDrawer } from '../components/SideMenuDrawer';
 import { useTheme } from '../hooks/useTheme';
 import { categories } from '../data/categories';
-import { providers } from '../data/providers';
+import { getRecentProviders } from '../data/providers';
+import { buildSearchPath } from '../utils/search';
+
+const HOME_RECENT_COUNT = 4;
+// TODO Supabase : charger les derniers prestataires inscrits
+const recentProviders = getRecentProviders(HOME_RECENT_COUNT);
 
 export default function Home() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -23,13 +27,8 @@ export default function Home() {
     setFavorites((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]));
   };
 
-  // URLSearchParams encode les caractères spéciaux et n'ajoute que les critères renseignés
   const handleSearch = (service: string, location: string) => {
-    const params = new URLSearchParams();
-    if (service.trim()) params.set('q', service.trim());
-    if (location.trim()) params.set('lieu', location.trim());
-    const queryString = params.toString();
-    navigate(queryString ? `/recherche?${queryString}` : '/recherche');
+    navigate(buildSearchPath({ q: service, lieu: location }));
   };
 
   return (
@@ -37,13 +36,8 @@ export default function Home() {
       <Header onOpenMenu={() => setIsMenuOpen(true)} theme={theme} onToggleTheme={toggleTheme} />
       <SearchCard onSearch={handleSearch} />
       <PromoCarousel />
-      <CategoriesSection
-        categories={categories}
-        selectedCategoryId={selectedCategoryId}
-        onSelectCategory={setSelectedCategoryId}
-        onSeeAll={() => navigate('/recherche')}
-      />
-      <ArtisansSection providers={providers} favorites={favorites} onToggleFavorite={toggleFavorite} />
+      <CategoriesSection categories={categories} />
+      <ArtisansSection providers={recentProviders} favorites={favorites} onToggleFavorite={toggleFavorite} />
       <BottomNav />
       <SideMenuDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} favoritesCount={favorites.length} />
     </div>

@@ -10,6 +10,14 @@ import { CallsListModal } from '../components/provider-dashboard/CallsListModal'
 import { ReviewsModal } from '../components/provider-dashboard/ReviewsModal';
 import { BottomNav } from '../components/navigation/BottomNav';
 import { PortfolioItem, ProviderProfileData } from '../types/dashboard';
+import {
+  demoCalls,
+  demoMonthlyViews,
+  demoNotifications,
+  demoReviews,
+  averageRating,
+  getViewsTrend,
+} from '../data/dashboardDemo';
 
 // TODO Supabase : remplacer par l'identifiant et le statut du prestataire connecté
 const CURRENT_PROVIDER_ID = '7';
@@ -52,6 +60,7 @@ export default function ProviderDashboard() {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>(initialPortfolio);
 
   const formattedAddress = [profile.commune, profile.ville].filter(Boolean).join(', ');
+  const currentMonthViews = demoMonthlyViews[demoMonthlyViews.length - 1]?.vues ?? 0;
 
   const tabs = [
     { id: 'profile' as const, label: 'Mon Profil' },
@@ -67,15 +76,17 @@ export default function ProviderDashboard() {
         providerId={CURRENT_PROVIDER_ID}
         isVerified={CURRENT_PROVIDER_VERIFIED}
         services={profile.services}
+        notifications={demoNotifications}
         onBack={() => navigate(-1)}
         onEditProfile={() => setActiveTab('profile')}
       />
 
       <DashboardStats
-        viewsCount={142}
-        callsCount={28}
-        rating={4.9}
-        reviewsCount={48}
+        viewsCount={currentMonthViews}
+        viewsTrend={getViewsTrend(demoMonthlyViews)}
+        callsCount={demoCalls.length}
+        rating={averageRating(demoReviews)}
+        reviewsCount={demoReviews.length}
         portfolioCount={portfolio.length}
         onViewsClick={() => setOpenModal('views')}
         onCallsClick={() => setOpenModal('calls')}
@@ -107,13 +118,13 @@ export default function ProviderDashboard() {
       {activeTab === 'portfolio' && <PortfolioTab portfolio={portfolio} onPortfolioChange={setPortfolio} />}
 
       <DashboardModal isOpen={openModal === 'views'} onClose={() => setOpenModal(null)} title="Vues du profil">
-        <ViewsChartModal />
+        <ViewsChartModal data={demoMonthlyViews} />
       </DashboardModal>
       <DashboardModal isOpen={openModal === 'calls'} onClose={() => setOpenModal(null)} title="Appels reçus">
-        <CallsListModal />
+        <CallsListModal calls={demoCalls} />
       </DashboardModal>
       <DashboardModal isOpen={openModal === 'reviews'} onClose={() => setOpenModal(null)} title="Avis clients">
-        <ReviewsModal />
+        <ReviewsModal reviews={demoReviews} />
       </DashboardModal>
 
       <BottomNav />
