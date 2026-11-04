@@ -2,14 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Provider } from '../../types';
 import { Heart, MapPin, ArrowRight } from 'lucide-react';
+import { useFavorites } from '../../hooks/useFavorites';
 
 interface ArtisansSectionProps {
   providers: Provider[];
-  favorites: string[];
-  onToggleFavorite: (id: string, e: React.MouseEvent) => void;
 }
 
-export const ArtisansSection: React.FC<ArtisansSectionProps> = ({ providers, favorites, onToggleFavorite }) => {
+export const ArtisansSection: React.FC<ArtisansSectionProps> = ({ providers }) => {
+  const { isFavorite, toggleFavorite } = useFavorites();
+
   return (
     <div className="px-4 my-6">
       <div className="flex items-center justify-between mb-3.5">
@@ -27,7 +28,7 @@ export const ArtisansSection: React.FC<ArtisansSectionProps> = ({ providers, fav
 
       <div className="grid grid-cols-2 gap-3">
         {providers.map((p) => {
-          const isFavorite = favorites.includes(p.id);
+          const favorite = isFavorite(p.id);
           return (
             <div
               key={p.id}
@@ -68,13 +69,13 @@ export const ArtisansSection: React.FC<ArtisansSectionProps> = ({ providers, fav
               {/* Favori : bouton séparé, en dehors du lien */}
               <button
                 type="button"
-                onClick={(e) => onToggleFavorite(p.id, e)}
+                onClick={() => toggleFavorite(p.id)}
                 className="absolute top-3 right-3 p-1.5 rounded-full hover:bg-background dark:hover:bg-white/10 transition active:scale-90 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
-                aria-label={isFavorite ? `Retirer ${p.name} des favoris` : `Ajouter ${p.name} aux favoris`}
+                aria-label={favorite ? `Retirer ${p.name} des favoris` : `Ajouter ${p.name} aux favoris`}
               >
                 <Heart
                   className={`w-4 h-4 ${
-                    isFavorite
+                    favorite
                       ? 'fill-secondary text-secondary dark:fill-emerald-400 dark:text-emerald-400'
                       : 'text-text-secondary dark:text-white/40'
                   }`}

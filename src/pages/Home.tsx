@@ -19,13 +19,7 @@ const recentProviders = getRecentProviders(HOME_RECENT_COUNT);
 export default function Home() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const [favorites, setFavorites] = useState<string[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const toggleFavorite = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFavorites((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]));
-  };
 
   const handleSearch = (service: string, location: string) => {
     navigate(buildSearchPath({ q: service, lieu: location }));
@@ -37,9 +31,9 @@ export default function Home() {
       <SearchCard onSearch={handleSearch} />
       <PromoCarousel />
       <CategoriesSection categories={categories} />
-      <ArtisansSection providers={recentProviders} favorites={favorites} onToggleFavorite={toggleFavorite} />
+      <ArtisansSection providers={recentProviders} />
       <BottomNav />
-      <SideMenuDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} favoritesCount={favorites.length} />
+      <SideMenuDrawer isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
     </div>
   );
 }

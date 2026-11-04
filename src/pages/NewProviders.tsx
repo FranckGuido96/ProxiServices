@@ -1,4 +1,3 @@
-import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { ResultCard } from '../components/search/ResultCard';
@@ -9,13 +8,6 @@ import { getRecentProviders } from '../data/providers';
 const newProviders = getRecentProviders();
 
 export default function NewProviders() {
-  const [favorites, setFavorites] = useState<string[]>([]);
-
-  const toggleFavorite = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFavorites((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]));
-  };
-
   return (
     <div className="min-h-screen bg-background dark:bg-[#050505] pb-24">
       <div className="px-4 pt-6 pb-4">
@@ -38,13 +30,7 @@ export default function NewProviders() {
         </p>
         <div className="space-y-2.5">
           {newProviders.map((provider) => (
-            <ResultCard
-              key={provider.id}
-              provider={provider}
-              isFavorite={favorites.includes(provider.id)}
-              onToggleFavorite={toggleFavorite}
-              showNewBadge
-            />
+            <ResultCard key={provider.id} provider={provider} showNewBadge />
           ))}
         </div>
       </div>

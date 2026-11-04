@@ -2,16 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, MapPin, Star } from 'lucide-react';
 import { Provider } from '../../types';
+import { useFavorites } from '../../hooks/useFavorites';
 
 interface ResultCardProps {
   provider: Provider;
-  isFavorite: boolean;
-  onToggleFavorite: (id: string, e: React.MouseEvent) => void;
   // Affiche le badge « Nouveau » à côté du nom (utilisé par la page des nouveaux prestataires)
   showNewBadge?: boolean;
 }
 
-export const ResultCard: React.FC<ResultCardProps> = ({ provider, isFavorite, onToggleFavorite, showNewBadge = false }) => {
+export const ResultCard: React.FC<ResultCardProps> = ({ provider, showNewBadge = false }) => {
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favorite = isFavorite(provider.id);
+
   return (
     <div className="relative rounded-2xl bg-surface dark:bg-[#121215] border border-border dark:border-white/10 shadow-sm dark:shadow-lg hover:border-primary-300 dark:hover:border-white/25 transition">
       {/* Zone principale : lien vers le profil (pr-12 laisse la place au cœur) */}
@@ -52,13 +54,13 @@ export const ResultCard: React.FC<ResultCardProps> = ({ provider, isFavorite, on
       {/* Favori : bouton séparé, en dehors du lien */}
       <button
         type="button"
-        onClick={(e) => onToggleFavorite(provider.id, e)}
+        onClick={() => toggleFavorite(provider.id)}
         className="absolute top-1/2 right-3 -translate-y-1/2 p-1.5 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
-        aria-label={isFavorite ? `Retirer ${provider.name} des favoris` : `Ajouter ${provider.name} aux favoris`}
+        aria-label={favorite ? `Retirer ${provider.name} des favoris` : `Ajouter ${provider.name} aux favoris`}
       >
         <Heart
           className={`w-4 h-4 ${
-            isFavorite
+            favorite
               ? 'fill-secondary text-secondary dark:fill-emerald-400 dark:text-emerald-400'
               : 'text-text-secondary dark:text-white/40'
           }`}

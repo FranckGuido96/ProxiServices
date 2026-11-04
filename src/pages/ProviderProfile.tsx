@@ -9,6 +9,7 @@ import { WriteReviewModal } from '../components/provider-profile/WriteReviewModa
 import { BottomNav } from '../components/navigation/BottomNav';
 import { providers } from '../data/providers';
 import { getProviderProfileDetail } from '../data/providerProfileDetails';
+import { useFavorites } from '../hooks/useFavorites';
 import { NewReview, PendingReview } from '../types/review';
 
 interface ProviderProfileContentProps {
@@ -17,9 +18,9 @@ interface ProviderProfileContentProps {
 
 function ProviderProfileContent({ id }: ProviderProfileContentProps) {
   const [activeTab, setActiveTab] = useState<ProfileTab>('presentation');
-  const [isFavorite, setIsFavorite] = useState(false);
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [pendingReviews, setPendingReviews] = useState<PendingReview[]>([]);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const provider = providers.find((p) => p.id === id) ?? providers[0];
   const detail = getProviderProfileDetail(provider.id);
@@ -43,7 +44,11 @@ function ProviderProfileContent({ id }: ProviderProfileContentProps) {
 
   return (
     <div className="min-h-screen bg-background dark:bg-[#050505] pb-24">
-      <ProfileHeader provider={provider} isFavorite={isFavorite} onToggleFavorite={() => setIsFavorite((v) => !v)} />
+      <ProfileHeader
+        provider={provider}
+        isFavorite={isFavorite(provider.id)}
+        onToggleFavorite={() => toggleFavorite(provider.id)}
+      />
 
       <ProfileTabs
         active={activeTab}
@@ -90,6 +95,6 @@ function ProviderProfileContent({ id }: ProviderProfileContentProps) {
 
 export default function ProviderProfile() {
   const { id } = useParams<{ id: string }>();
-  // La clé remet à zéro l'onglet, le favori et les avis en attente quand on passe d'une fiche à une autre
+  // La clé remet à zéro l'onglet et les avis en attente quand on passe d'une fiche à une autre
   return <ProviderProfileContent key={id} id={id} />;
 }

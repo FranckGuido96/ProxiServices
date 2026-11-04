@@ -3,19 +3,20 @@ import { Link } from 'react-router-dom';
 import { X, Home, UserPlus, Heart, Settings } from 'lucide-react';
 import logo from '../assets/images/logo 1.svg';
 import { useDialogFocus } from '../hooks/useDialogFocus';
+import { useFavorites } from '../hooks/useFavorites';
 
 interface SideMenuDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  favoritesCount: number;
 }
 
 const itemClass =
   'w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-text dark:text-white hover:bg-background dark:hover:bg-white/5 transition outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400';
 
 // Monté seulement quand le menu est ouvert
-const DrawerDialog: React.FC<Omit<SideMenuDrawerProps, 'isOpen'>> = ({ onClose, favoritesCount }) => {
+const DrawerDialog: React.FC<Omit<SideMenuDrawerProps, 'isOpen'>> = ({ onClose }) => {
   const drawerRef = useRef<HTMLDivElement>(null);
+  const { favorites } = useFavorites();
   useDialogFocus(drawerRef, onClose);
 
   return (
@@ -81,7 +82,7 @@ const DrawerDialog: React.FC<Omit<SideMenuDrawerProps, 'isOpen'>> = ({ onClose, 
                 <span>Mes favoris</span>
               </div>
               <span className="bg-primary-50 border border-primary-200 text-primary-700 dark:bg-emerald-950 dark:border-emerald-500/30 dark:text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                {favoritesCount}
+                {favorites.length}
               </span>
             </Link>
           </nav>
@@ -96,7 +97,7 @@ const DrawerDialog: React.FC<Omit<SideMenuDrawerProps, 'isOpen'>> = ({ onClose, 
   );
 };
 
-export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({ isOpen, onClose, favoritesCount }) => {
+export const SideMenuDrawer: React.FC<SideMenuDrawerProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
-  return <DrawerDialog onClose={onClose} favoritesCount={favoritesCount} />;
+  return <DrawerDialog onClose={onClose} />;
 };

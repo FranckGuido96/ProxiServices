@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Search, ChevronDown } from 'lucide-react';
 import { ResultCard } from '../components/search/ResultCard';
@@ -27,12 +27,6 @@ function SearchResultsContent({ initialQuery, initialLieu }: SearchResultsConten
   const [query, setQuery] = useState(initialQuery);
   const [selectedTrade, setSelectedTrade] = useState('');
   const [selectedCommune, setSelectedCommune] = useState(initialCommune);
-  const [favorites, setFavorites] = useState<string[]>([]);
-
-  const toggleFavorite = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setFavorites((prev) => (prev.includes(id) ? prev.filter((f) => f !== id) : [...prev, id]));
-  };
 
   const filteredProviders = useMemo(() => {
     const q = normalize(query);
@@ -119,12 +113,7 @@ function SearchResultsContent({ initialQuery, initialLieu }: SearchResultsConten
         ) : (
           <div className="space-y-2.5">
             {filteredProviders.map((provider) => (
-              <ResultCard
-                key={provider.id}
-                provider={provider}
-                isFavorite={favorites.includes(provider.id)}
-                onToggleFavorite={toggleFavorite}
-              />
+              <ResultCard key={provider.id} provider={provider} />
             ))}
           </div>
         )}
