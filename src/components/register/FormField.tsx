@@ -4,12 +4,15 @@ import { ChevronDown } from 'lucide-react';
 interface FormFieldProps {
   label: string;
   placeholder: string;
-  type?: 'text' | 'tel' | 'password' | 'select';
+  type?: 'text' | 'tel' | 'email' | 'password' | 'select';
   options?: string[];
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
-  error?: boolean;
+  // true : message par défaut ; texte : message précis affiché sous le champ
+  error?: boolean | string;
+  // Aide les gestionnaires de mots de passe et le navigateur à remplir le champ (ex. "tel", "new-password")
+  autoComplete?: string;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -21,11 +24,14 @@ export const FormField: React.FC<FormFieldProps> = ({
   onChange,
   required = false,
   error = false,
+  autoComplete,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
-  const describedBy = error ? errorId : undefined;
-  const borderClass = error
+  const errorMessage = typeof error === 'string' ? error : error ? 'Ce champ est obligatoire' : null;
+  const hasError = errorMessage !== null && errorMessage !== '';
+  const describedBy = hasError ? errorId : undefined;
+  const borderClass = hasError
     ? 'border-red-500 dark:border-red-500/70'
     : 'border-border dark:border-white/10 focus:border-primary-500 dark:focus:border-emerald-500/80';
 
@@ -47,7 +53,7 @@ export const FormField: React.FC<FormFieldProps> = ({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             aria-required={required}
-            aria-invalid={error}
+            aria-invalid={hasError}
             aria-describedby={describedBy}
             className={`w-full appearance-none bg-background dark:bg-[#09090B] border rounded-xl px-3 py-2.5 text-sm text-text dark:text-white focus:outline-none transition ${borderClass}`}
           >
@@ -69,16 +75,17 @@ export const FormField: React.FC<FormFieldProps> = ({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          autoComplete={autoComplete}
           aria-required={required}
-          aria-invalid={error}
+          aria-invalid={hasError}
           aria-describedby={describedBy}
           className={`w-full bg-background dark:bg-[#09090B] border rounded-xl px-3 py-2.5 text-sm text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none transition ${borderClass}`}
         />
       )}
 
-      {error && (
+      {hasError && (
         <p id={errorId} role="alert" className="text-[11px] text-red-500 mt-1">
-          Ce champ est obligatoire
+          {errorMessage}
         </p>
       )}
     </div>
