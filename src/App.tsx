@@ -1,11 +1,10 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { FavoritesProvider } from './context/FavoritesProvider';
 import Home from './pages/Home';
 import SearchResults from './pages/SearchResults';
 import AllCategories from './pages/AllCategories';
 import NewProviders from './pages/NewProviders';
 import Favorites from './pages/Favorites';
-import Profile from './pages/Profile';
 import Login from './pages/Login';
 import RegisterClient from './pages/RegisterClient';
 import ProviderProfile from './pages/ProviderProfile';
@@ -24,7 +23,8 @@ function App() {
           <Route path="/categories" element={<AllCategories />} />
           <Route path="/nouveaux-prestataires" element={<NewProviders />} />
           <Route path="/favoris" element={<Favorites />} />
-          <Route path="/profil" element={<Profile />} />
+          {/* Tant qu'aucune session n'existe, « Profil » mène à la connexion ; la page du compte viendra avec Supabase */}
+          <Route path="/profil" element={<Navigate to="/connexion" replace />} />
           <Route path="/connexion" element={<Login />} />
           <Route path="/inscription" element={<RegisterClient />} />
           {/* Route statique déclarée avant la route dynamique /prestataire/:id */}

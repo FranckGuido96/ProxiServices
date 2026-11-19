@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { Mail, User } from 'lucide-react';
 import { AuthLayout } from '../components/auth/AuthLayout';
 import { FormSection } from '../components/register/FormSection';
 import { FormField } from '../components/register/FormField';
@@ -9,6 +9,9 @@ import { MIN_PASSWORD_LENGTH, isValidEmail, isValidPhone } from '../utils/valida
 type FieldName = 'name' | 'phone' | 'email' | 'password' | 'confirmPassword';
 type FieldErrors = Partial<Record<FieldName, string>>;
 
+const SUBMIT_NOTICE = "Les comptes ne sont pas encore activés : vos informations n'ont pas été envoyées.";
+const GOOGLE_NOTICE = "L'inscription avec Google n'est pas encore activée.";
+
 export default function RegisterClient() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -16,7 +19,7 @@ export default function RegisterClient() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [showNotice, setShowNotice] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const clearError = (field: FieldName) => setErrors((prev) => ({ ...prev, [field]: undefined }));
 
@@ -36,11 +39,17 @@ export default function RegisterClient() {
     else if (password && confirmPassword !== password) nextErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
 
     setErrors(nextErrors);
-    setShowNotice(false);
+    setNotice(null);
     if (Object.keys(nextErrors).length > 0) return;
 
     // TODO Supabase : création du compte client (téléphone = identifiant), puis confirmation par code SMS
-    setShowNotice(true);
+    setNotice(SUBMIT_NOTICE);
+  };
+
+  const handleGoogle = () => {
+    // TODO Supabase : inscription avec Google (le numéro de téléphone pourra être demandé ensuite)
+    setErrors({});
+    setNotice(GOOGLE_NOTICE);
   };
 
   return (
@@ -49,6 +58,7 @@ export default function RegisterClient() {
       highlight="compte"
       subtitle="Gratuit : enregistrez vos favoris, laissez des avis et signalez un profil."
       icon={<User className="w-5 h-5" />}
+      backTo="/connexion"
     >
       <form onSubmit={handleSubmit} noValidate>
         <FormSection title="Vos informations">
@@ -129,14 +139,28 @@ export default function RegisterClient() {
           Créer mon compte
         </button>
 
-        {showNotice && (
-          <p
-            role="status"
-            className="mt-3 bg-amber-50 dark:bg-[#2A1D08] border border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs rounded-xl p-3 leading-relaxed"
-          >
-            Les comptes ne sont pas encore activés : vos informations n'ont pas été envoyées.
-          </p>
-        )}
+        <div className="flex items-center gap-3 mt-4" aria-hidden="true">
+          <span className="h-px flex-1 bg-border dark:bg-white/10" />
+          <span className="text-[11px] text-text-secondary dark:text-white/40">ou</span>
+          <span className="h-px flex-1 bg-border dark:bg-white/10" />
+        </div>
+        <button
+          type="button"
+          onClick={handleGoogle}
+          className="w-full mt-4 border border-border dark:border-white/10 bg-background dark:bg-[#09090B] text-text dark:text-white font-semibold text-sm py-3 rounded-xl hover:border-primary-300 dark:hover:border-white/25 transition flex items-center justify-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-primary-500 dark:focus-visible:ring-emerald-400"
+        >
+          <Mail className="w-4 h-4" aria-hidden="true" />
+          S'inscrire avec Google
+        </button>
+
+        {/* Zone annoncée aux lecteurs d'écran : toujours présente, le message s'y ajoute */}
+        <div role="status">
+          {notice && (
+            <p className="mt-3 bg-amber-50 dark:bg-[#2A1D08] border border-amber-300 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs rounded-xl p-3 leading-relaxed">
+              {notice}
+            </p>
+          )}
+        </div>
 
         <p className="text-center text-[11px] text-text-secondary dark:text-white/40 mt-3 leading-relaxed">
           Gratuit, aucune carte requise. En créant un compte, vous acceptez les conditions générales d'utilisation.

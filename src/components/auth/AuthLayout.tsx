@@ -17,7 +17,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
   highlight,
   subtitle,
   icon,
-  backTo = '/profil',
+  backTo = '/',
   children,
 }) => {
   return (
