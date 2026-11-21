@@ -13,6 +13,8 @@ interface FormFieldProps {
   error?: boolean | string;
   // Aide les gestionnaires de mots de passe et le navigateur à remplir le champ (ex. "tel", "new-password")
   autoComplete?: string;
+  // Icône affichée à gauche du champ (ignorée pour les listes déroulantes)
+  leadingIcon?: React.ReactNode;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -25,6 +27,7 @@ export const FormField: React.FC<FormFieldProps> = ({
   required = false,
   error = false,
   autoComplete,
+  leadingIcon,
 }) => {
   const id = useId();
   const errorId = `${id}-error`;
@@ -69,18 +72,30 @@ export const FormField: React.FC<FormFieldProps> = ({
           <ChevronDown className="w-4 h-4 text-text-secondary dark:text-white/40 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
       ) : (
-        <input
-          id={id}
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          aria-required={required}
-          aria-invalid={hasError}
-          aria-describedby={describedBy}
-          className={`w-full bg-background dark:bg-[#09090B] border rounded-xl px-3 py-2.5 text-sm text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none transition ${borderClass}`}
-        />
+        <div className="relative">
+          {leadingIcon && (
+            <span
+              aria-hidden="true"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary dark:text-white/40 pointer-events-none"
+            >
+              {leadingIcon}
+            </span>
+          )}
+          <input
+            id={id}
+            type={type}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            autoComplete={autoComplete}
+            aria-required={required}
+            aria-invalid={hasError}
+            aria-describedby={describedBy}
+            className={`w-full bg-background dark:bg-[#09090B] border rounded-xl py-2.5 pr-3 ${
+              leadingIcon ? 'pl-10' : 'pl-3'
+            } text-sm text-text dark:text-white placeholder:text-text-secondary/60 dark:placeholder:text-white/30 focus:outline-none transition ${borderClass}`}
+          />
+        </div>
       )}
 
       {hasError && (
